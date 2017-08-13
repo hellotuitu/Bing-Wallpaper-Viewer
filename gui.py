@@ -10,15 +10,29 @@ import tkFileDialog
 # from tkinter.simpledialog  import *
 from tkSimpleDialog import askstring
 import tkMessageBox
+import _thread
+import time
+
+def hello(threadName, delay):
+    next_bt['state'] = DISABLED
+    time.sleep(3)
+    update()
+    next_bt['state'] = NORMAL
 
 def next_button():
-    global current_date
+    global current_date, data_v
+    date_v.set('loading...')
+
     current_date = current_date + datetime.timedelta(1)
-    update()
+    # update()
+    _thread.start_new_thread( hello, ("Thread-1", 3, ) )
+    print 'done'
+
 
 def pre_button():
     global current_date, v, img_label, root, image, current_pic, current_word
     print 'pre button'
+    # _thread.start_new_thread( hello, ("Thread-1", 0, ) )
     current_date = current_date - datetime.timedelta(1)
     pic, word = data.get_image_data(current_date)
     current_pic = pic
@@ -86,9 +100,11 @@ tk_img = ImageTk.PhotoImage(img)
 img_label = Label(root, image=tk_img)
 img_label.grid(row=0, column=0, columnspan=3)
 # img_label.pack()
-pre_bt = Button(root, text=' < pre ', command=pre_button).grid(row=1, column=0)#.pack(side=LEFT)
+pre_bt = Button(root, text=' < pre ', command=pre_button)
+pre_bt.grid(row=1, column=0)#.pack(side=LEFT)
 date_label = Label(root, textvariable=date_v,  anchor='center', width = 100).grid(row=1, column=1)#.pack(side=LEFT)
-next_bt = Button(root, text=' next > ', command=next_button).grid(row=1, column=2)#.pack(side=RIGHT)
+next_bt = Button(root, text=' next > ', command=next_button)
+next_bt.grid(row=1, column=2)#.pack(side=RIGHT)
 
 menubar=Menu(root,tearoff=False)
 def save_file_command():

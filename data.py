@@ -1,4 +1,4 @@
-# coding=utf-8
+    # coding=utf-8
 import urllib2
 import datetime
 from PIL import Image
@@ -14,8 +14,11 @@ def get_image_data(date):
     bs = BeautifulSoup(html, 'html.parser')
     img = bs.select('#photos > div > div.imgContainer > img')
     word = bs.select('#photos > div > div.panel-overlay > p').pop().get_text()
-    src = 'http:' + img.pop().get('src')
-    pic = urllib2.urlopen(src).read()
+    # src = 'https:' + img.pop().get('src')
+    raw_src = img.pop().get('src')
+    src = 'http://cdn.nanxiongnandi.com/bing' + raw_src[raw_src.rindex('/'):]
+    print src
+    pic = urllib2.urlopen(src, timeout = 3).read()
     return [pic, word]
 
 
