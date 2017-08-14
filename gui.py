@@ -3,8 +3,8 @@ from Tkinter import *
 import tkFileDialog
 from tkSimpleDialog import askstring
 import tkMessageBox
-import _thread
-
+import thread
+import platform
 
 class Bing:
     def __init__(self, kernel):
@@ -39,21 +39,22 @@ class Bing:
         self.root.title('Bing Wallpaper Viewer')
         self.kernel.init_kernel()
         self.image_label['image'] = self.kernel.current_image
-        _thread.start_new_thread(self.multi_thread, ("Thread-1", 0,))
+        thread.start_new_thread(self.multithread, ("Thread-1", 0,))
 
     def update(self):
         try:
             self.kernel.update_data()
             self.image_label['image'] = self.kernel.current_image
             self.date_v.set(str(self.kernel.current_date))
-            self.root.title(self.kernel.current_description)
+            if platform.system() != 'Windows':
+                self.root.title(self.kernel.current_description)
         except BaseException:
             print 'error'
             return False
         else:
             return True
 
-    def multi_thread(self, threadName, delay):
+    def multithread(self, threadName, delay):
         self.next_button['state'] = DISABLED
         self.pre_button['state'] = DISABLED
 
@@ -66,12 +67,12 @@ class Bing:
 
     def pre_button_handler(self):
         self.kernel.pre_date()
-        _thread.start_new_thread(self.multi_thread, ("Thread-1", 0,))
+        thread.start_new_thread(self.multithread, ("Thread-1", 0,))
         # self.update()
 
     def next_button_handler(self):
         self.kernel.next_date()
-        _thread.start_new_thread(self.multi_thread, ("Thread-1", 0,))
+        thread.start_new_thread(self.multithread, ("Thread-1", 0,))
 
     def save_file_handler(self):
         self.kernel.save_current_image(str(self.kernel.current_date) + '.jpg')
@@ -83,7 +84,7 @@ class Bing:
     def ask_date_to_handler(self):
         input_date = askstring('Bing Wallpaper Viewer', '输入日期', initialvalue=str(self.kernel.current_date))
         self.kernel.goto_date(input_date)
-        _thread.start_new_thread(self.multi_thread, ("Thread-1", 0,))
+        thread.start_new_thread(self.multithread, ("Thread-1", 0,))
 
     def right_key_handler(self, event):
         self.menubar.post(event.x_root, event.y_root)
