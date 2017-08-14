@@ -1,175 +1,92 @@
 # -*- coding: UTF-8 -*-
-
 from Tkinter import *
-from PIL import Image, ImageTk
-import data
-import datetime
-import io
-from FileDialog import LoadFileDialog
 import tkFileDialog
-# from tkinter.simpledialog  import *
 from tkSimpleDialog import askstring
 import tkMessageBox
 import _thread
-import time
-
-def hello(threadName, delay):
-    next_bt['state'] = DISABLED
-    time.sleep(3)
-    update()
-    next_bt['state'] = NORMAL
-
-def next_button():
-    global current_date, data_v
-    date_v.set('loading...')
-
-    current_date = current_date + datetime.timedelta(1)
-    # update()
-    _thread.start_new_thread( hello, ("Thread-1", 3, ) )
-    print 'done'
 
 
-def pre_button():
-    global current_date, v, img_label, root, image, current_pic, current_word
-    print 'pre button'
-    # _thread.start_new_thread( hello, ("Thread-1", 0, ) )
-    current_date = current_date - datetime.timedelta(1)
-    pic, word = data.get_image_data(current_date)
-    current_pic = pic
-    current_word = word
-    img = process_image(pic)
-    tk_img = ImageTk.PhotoImage(img)
-    # img_label.image = tk_img
-    # root.update_idletasks()
-    img_label.configure(image=tk_img)
-    image = tk_img  # keep a reference
-    date_v.set(str(current_date))
-    root.title(word)
-    v.set(word)
+class Bing:
+    def __init__(self, kernel):
+        self.root = root = Tk()
+        self.kernel = kernel
 
+        self.image_label = Label(root)
+        self.date_v = StringVar(root)
+        self.description_label = Label(root, textvariable=self.date_v)
+        self.pre_button = Button(root, text=' < pre ', command=self.pre_button_handler)
+        self.next_button = Button(root, text=' next > ', command=self.next_button_handler)
 
-def process_image(pic):
-    data_stream = io.BytesIO(pic)
-    image = Image.open(data_stream)
-    w_box = 1000
-    h_box = 1000
-    w, h = image.size
-    image_resized = data.resize_image(w, h, w_box, h_box, image)
-    return image_resized
+        self.menubar = Menu(self.root, tearoff=False)
+        self.menubar.add_command(label='保存到当前文件夹下', command=self.save_file_handler)
+        self.menubar.add_separator()
+        self.menubar.add_command(label='保存到指定的文件夹下', command=self.save_file_to_handler)
+        self.menubar.add_separator()
+        self.menubar.add_command(label='跳转到指定日期的图片', command=self.ask_date_to_handler)
 
+        self.image_label.bind("<ButtonPress-3>", self.right_key_handler)
+        self.image_label.bind("<ButtonPress-1>", self.left_key_handler)
 
-def update():
-    global current_date, v, img_label, root, image, current_pic, current_word
-    if current_date >= datetime.date.today():
-        current_date = datetime.date.today() - datetime.timedelta(1)
-        tkMessageBox.showwarning('Bing Wallpaper Viewer', '该日期不可达!')
-        return NONE
-    pic, word = data.get_image_data(current_date)
-    current_pic = pic
-    current_word = word
-    img = process_image(pic)
-    tk_img = ImageTk.PhotoImage(img)
-    # img_label.image = tk_img
-    # root.update_idletasks()
-    img_label.configure(image=tk_img)
-    image = tk_img  # keep a reference
-    date_v.set(str(current_date))
-    root.title(word)
-    v.set(word)
+        self.image_label.grid(row=0, column=0, columnspan=3)
+        self.pre_button.grid(row=1, column=0)
+        self.description_label.grid(row=1, column=1)
+        self.next_button.grid(row=1, column=2)
 
-current_date = datetime.date.today() - datetime.timedelta(1)
-current_pic = NONE
-current_word = NONE
-# word_label = NONE
-# img_label = NONE
-# text = StringVar()
+        self.init_set()
+        self.root.mainloop()
 
-image = NONE
-root = Tk()
-root.title('Bing Wallpaper Viewer')
-v = StringVar(root)
-date_v = StringVar(root)
-date_v.set(str(current_date))
-pic, word = data.get_image_data(current_date)
-current_pic = pic
-current_word = word
-img = process_image(pic)
-tk_img = ImageTk.PhotoImage(img)
-# word_label = Label(root, textvariable=v)
-# word_label.pack()
-img_label = Label(root, image=tk_img)
-img_label.grid(row=0, column=0, columnspan=3)
-# img_label.pack()
-pre_bt = Button(root, text=' < pre ', command=pre_button)
-pre_bt.grid(row=1, column=0)#.pack(side=LEFT)
-date_label = Label(root, textvariable=date_v,  anchor='center', width = 100).grid(row=1, column=1)#.pack(side=LEFT)
-next_bt = Button(root, text=' next > ', command=next_button)
-next_bt.grid(row=1, column=2)#.pack(side=RIGHT)
+    def init_set(self):
+        self.root.title('Bing Wallpaper Viewer')
+        self.kernel.init_kernel()
+        self.image_label['image'] = self.kernel.current_image
+        _thread.start_new_thread(self.multi_thread, ("Thread-1", 0,))
 
-menubar=Menu(root,tearoff=False)
-def save_file_command():
-    data.save_image_data(current_pic, str(current_date) + '.jpg')
+    def update(self):
+        try:
+            self.kernel.update_data()
+            self.image_label['image'] = self.kernel.current_image
+            self.date_v.set(str(self.kernel.current_date))
+            self.root.title(self.kernel.current_description)
+        except BaseException:
+            print 'error'
+            return False
+        else:
+            return True
 
-def save_file_to():
-    filename = tkFileDialog.askdirectory()
-    # fd = LoadFileDialog(root) # 创建打开文件对话框
-    # filename = fd.go() # 显示打开文件对话框，并获取选择的文件名称
-    data.save_image_data(current_pic, filename + '/' + str(current_date) + '.jpg')
-    # print filename
+    def multi_thread(self, threadName, delay):
+        self.next_button['state'] = DISABLED
+        self.pre_button['state'] = DISABLED
 
-def ask_date():
-    global current_date
-    r = askstring('Bing Wallpaper Viewer', '输入日期', initialvalue = str(current_date))
-    current_date = datetime.datetime.strptime(r, "%Y-%m-%d").date()
-    update()
+        self.date_v.set('loading...')
+        if not self.update():
+            self.date_v.set('fail to load!')
 
-menubar.add_command(label='保存到当前文件夹下', command=save_file_command)
-menubar.add_separator()
-menubar.add_command(label='保存到指定的文件夹下', command=save_file_to)
-menubar.add_separator()
-menubar.add_command(label='跳转到指定日期的图片', command=ask_date)
+        self.next_button['state'] = NORMAL
+        self.pre_button['state'] = NORMAL
 
-# frame=Frame(root,
-#             width=100,height=100,
-#             background='red')
-# frame.grid()
+    def pre_button_handler(self):
+        self.kernel.pre_date()
+        _thread.start_new_thread(self.multi_thread, ("Thread-1", 0,))
+        # self.update()
 
+    def next_button_handler(self):
+        self.kernel.next_date()
+        _thread.start_new_thread(self.multi_thread, ("Thread-1", 0,))
 
-def rightKey(event):
-    menubar.post(event.x_root, event.y_root)
-def leftKey(event):
-    print 'left button'
-    menubar.unpost()
-def leave(event):
-    print 'leave'
-    # menubar.unpost()
+    def save_file_handler(self):
+        self.kernel.save_current_image(str(self.kernel.current_date) + '.jpg')
 
-img_label.bind("<ButtonPress-3>",rightKey)
-img_label.bind("<ButtonPress-1>",leftKey)
-# img_label.bind("<Leave>",leave)
-#frame框绑定鼠标右键
-# frame.bind()
+    def save_file_to_handler(self):
+        filename = tkFileDialog.askdirectory()
+        self.kernel.save_current_image(filename + '/' + str(self.kernel.current_date) + '.jpg')
 
-root.mainloop()
+    def ask_date_to_handler(self):
+        input_date = askstring('Bing Wallpaper Viewer', '输入日期', initialvalue=str(self.kernel.current_date))
+        self.kernel.goto_date(input_date)
+        _thread.start_new_thread(self.multi_thread, ("Thread-1", 0,))
 
+    def right_key_handler(self, event):
+        self.menubar.post(event.x_root, event.y_root)
 
-
-
-# # 创建两个列表
-# li = ['C', 'python', 'php', 'html', 'SQL', 'java']
-# movie = ['CSS', 'jQuery', 'Bootstrap']
-# listb = Listbox(root)  # 创建两个列表组件
-# listb2 = Listbox(root)
-# for item in li:  # 第一个小部件插入数据
-#     listb.insert(0, item)
-#
-# for item in movie:  # 第二个小部件插入数据
-#     listb2.insert(0, item)
-# Button(root, text='Hello Button', command=helloButton).pack()
-# listb.pack()  # 将小部件放置到主窗口中
-# listb2.pack()
-# filename = './tmp.png'
-# img = ImageTk.PhotoImage(file=filename)
-# label = Label(root, image=img)
-# label.pack()
-# root.mainloop()  # 进入消息循环
+    def left_key_handler(self, event):
+        self.menubar.unpost()
