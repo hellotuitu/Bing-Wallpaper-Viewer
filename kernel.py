@@ -15,13 +15,12 @@ class Kernel:
         self.current_description = NONE
 
     def init_kernel(self):
-        with open('default.jpg') as pic:
-            image = Image.open(pic)
-            w_box = 1000
-            h_box = 1000
-            w, h = image.size
-            image_resized = self.resize_image(w, h, w_box, h_box, image)
-            self.current_image = ImageTk.PhotoImage(image_resized)
+        image = Image.open('default.jpg')
+        w_box = 1000
+        h_box = 1000
+        w, h = image.size
+        image_resized = self.resize_image(w, h, w_box, h_box, image)
+        self.current_image = ImageTk.PhotoImage(image_resized)
 
     def get_data(self):
         date_str = str(self.current_date).replace('-', '')
