@@ -4,7 +4,17 @@ import io
 from Tkconstants import NONE
 from PIL import Image, ImageTk
 from bs4 import BeautifulSoup
+import sys, os
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 class Kernel:
     def __init__(self):
@@ -15,7 +25,7 @@ class Kernel:
         self.current_description = NONE
 
     def init_kernel(self):
-        image = Image.open('default.jpg')
+        image = Image.open(resource_path('default.jpg'))
         w_box = 1000
         h_box = 1000
         w, h = image.size
