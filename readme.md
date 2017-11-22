@@ -1,30 +1,48 @@
 # Bing Wallpaper Viewer
-某天刷网页的时候突然觉得`bing`搜索引擎的壁纸挺好看,于是想要下载下来.bing很贴心的提供了当日壁纸的下载功能, 然而通过这种方式下载的图片有水印并且只能下载当天的, 于是自己动手写了个bing的壁纸查看器, 可以查看并保存任意一天的壁纸且无水印.
+someday, I certainly feel Bing's wallpaper is
+good when I surf in the Interet.But, bing only allows
+users to download today's wallpaper and the wallpaper
+has watermelon.For this reason, I wrote this program
+to view and download everyday's wallpaper from bing.
 
-如果你也喜欢bing的壁纸, 它会有用的:)
+I think it will be useful if you like bing's wallpapers
+too.
 
-## 界面
+## Requirements
+
+Based on python2.7.Packages imported by this program
+could be found in `requirements.txt`.
+
+## Usage
+
  ![bing_gui](./bing_gui.png)
 
-## 功能说明
+like the picture above showed, in the bottom,there
+are three blocks(two buttons and one label).
 
-界面下方的两个按钮分别可以查看昨天和明天的壁纸(如果存在的话).界面下方还会显示这是哪一天的壁纸.界面的标题就是对当前壁纸的描述.在图片区域右键会弹出菜单,分别有以下选项:
-- `保存到当前文件夹下`:将当前的图片保存到程序启动的目录下,方便快捷.
-- `保存到指定的文件夹下`:将当前的图片保存到用户指定的目录下(点击将会弹出文件对话框)
-- `跳转到指定日期的图片`:直接跳转到特定日期(由用户输入)的壁纸.
+- `< pre`: by pressing this button, the image area will show
+wallpaper the day before.
+- `label`: the label shows the current day.
+- `next >`: by pressing this button, the image area will show
+wallpaper the day after.
 
-在图片区域左键将会隐藏菜单.
+if you right click in the image area, a menu will be poped out.
+The menu has three buttons.
+- `保存到当前文件夹`: this button allows you to save current image to 
+current folder.
+- `保存到指定的文件夹`: this button allows you to save current image to
+folder you specified.
+- `跳转到指定日期的图片`: this button allows you to view wallpaper of the
+day you specified.
 
-## 如何使用
-### 运行python代码
-适用于了解python的人, 需要`python 2.7`并安装以下依赖:
-- BeautifulSoup4
-- Pillow
+Just a reminder, the memu will be hidden by left click in the image area.
 
-确保依赖安装完成之后, 直接运行`bing.py`即可, 不依赖平台.
+### How to run it
 
-### 运行二进制文件
-已提供windows系统二进制文件, 下载`bin/bing.exe`, 点击即可运行.
+1. first, download or clone the entire project.
+1. then, run command `python2 bing.py` in your terminal.
 
-## Bug记录
-在windows下, tkinter不允许多个线程同时操作UI, 但应用为了避免UI失去响应一开始就是多线程设计, 因此在windows下时, 将无法更改标题栏的图片描述(反正影响也不大...)
+## Note
+
+the data comes from `https://bingwallpaper.com` and `http://cdn.nanxiongnandi.com/bing`.
+
