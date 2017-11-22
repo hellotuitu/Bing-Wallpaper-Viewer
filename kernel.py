@@ -20,6 +20,7 @@ class Kernel:
     def __init__(self):
         self.source_url = 'https://bingwallpaper.com/CN/%s.html'
         self.current_date = datetime.date.today() - datetime.timedelta(1)
+        self.last_date = self.current_date
         self.current_image = NONE
         self.current_raw_image = NONE
         self.current_description = NONE
@@ -34,13 +35,15 @@ class Kernel:
 
     def get_data(self):
         date_str = str(self.current_date).replace('-', '')
+        print self.source_url % date_str
         html = urllib2.urlopen(self.source_url % date_str, timeout=10).read()
         bs = BeautifulSoup(html, 'html.parser')
-        img = bs.select('#photos > div > div.imgContainer > img')
-        word = bs.select('#photos > div > div.panel-overlay > p').pop().get_text()
-        # src = 'https:' + img.pop().get('src')
-        raw_src = img.pop().get('src')
+        a = bs.find_all('a', attrs={'href': '%s.html' % date_str}).pop()
+        img = a.find_all('img').pop()
+        word = img.get('alt')
+        raw_src = img.get('src')
         src = 'http://cdn.nanxiongnandi.com/bing' + raw_src[raw_src.rindex('/'):]
+        print src
         pic = urllib2.urlopen(src, timeout=3).read()
         return [pic, word]
 
@@ -64,12 +67,15 @@ class Kernel:
         img_file.close()
 
     def next_date(self):
+        self.last_date = self.current_date
         self.current_date += datetime.timedelta(1)
 
     def pre_date(self):
+        self.last_date = self.current_date
         self.current_date -= datetime.timedelta(1)
 
     def goto_date(self, date_str):
+        self.last_date = self.current_date
         self.current_date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
 
     @staticmethod
@@ -80,3 +86,7 @@ class Kernel:
         width = int(w * factor)
         height = int(h * factor)
         return pil_image.resize((width, height), Image.ANTIALIAS)
+
+if __name__ == '__main__':
+    import requests
+    print requests.get('https://www.baidu.com')

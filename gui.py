@@ -48,8 +48,8 @@ class Bing:
             self.date_v.set(str(self.kernel.current_date))
             if platform.system() != 'Windows':
                 self.root.title(self.kernel.current_description)
-        except BaseException:
-            print 'error'
+        except BaseException as why:
+            self.kernel.current_date = self.kernel.last_date
             return False
         else:
             return True
@@ -91,3 +91,5 @@ class Bing:
 
     def left_key_handler(self, event):
         self.menubar.unpost()
+
+if __name__ == '__main__': pass
