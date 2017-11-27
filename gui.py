@@ -50,6 +50,7 @@ class Bing:
                 self.root.title(self.kernel.current_description)
         except BaseException as why:
             self.kernel.current_date = self.kernel.last_date
+            print why
             return False
         else:
             return True

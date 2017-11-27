@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import urllib2
 import datetime
 import io
@@ -5,6 +6,9 @@ from Tkconstants import NONE
 from PIL import Image, ImageTk
 from bs4 import BeautifulSoup
 import sys, os
+import json
+import requests
+
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -16,9 +20,13 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
+
 class Kernel:
     def __init__(self):
-        self.source_url = 'https://bingwallpaper.com/CN/%s.html'
+        # change resorce to http://bingwallpaper.anerg.com/cn/
+        # it's a sad story because bing only provides no more than 7 days' wallpapers
+
+        # set current day to the day before, in case today's wallpaper is not availiable
         self.current_date = datetime.date.today() - datetime.timedelta(1)
         self.last_date = self.current_date
         self.current_image = NONE
@@ -34,17 +42,30 @@ class Kernel:
         self.current_image = ImageTk.PhotoImage(image_resized)
 
     def get_data(self):
-        date_str = str(self.current_date).replace('-', '')
-        print self.source_url % date_str
-        html = urllib2.urlopen(self.source_url % date_str, timeout=10).read()
-        bs = BeautifulSoup(html, 'html.parser')
-        a = bs.find_all('a', attrs={'href': '%s.html' % date_str}).pop()
-        img = a.find_all('img').pop()
-        word = img.get('alt')
-        raw_src = img.get('src')
-        src = 'http://cdn.nanxiongnandi.com/bing' + raw_src[raw_src.rindex('/'):]
-        print src
-        pic = urllib2.urlopen(src, timeout=3).read()
+        # date_gap = (datetime.date.today() - self.current_date).days
+        # data = requests.get('https://www.bing.com/HPImageArchive.aspx', {
+        #     'format': 'js',
+        #     'idx': date_gap,
+        #     'n': '1', })
+        # parsed_data = json.loads(data.content, encoding='utf-8')
+        # # print unicode(parsed_data).decode('unicode-escape')
+        # src = parsed_data['images'][0]['urlbase']
+        # src = src[src.rindex('/'):] + '_1366x768.jpg'
+        # word = parsed_data['images'][0]['copyright']
+        # pic = requests.get('http://cdn.nanxiongnandi.com/bing' + src).content
+        # return [pic, word]
+        source = 'http://bingwallpaper.anerg.com/cn/{}{}'.format(self.current_date.year,
+                                                                 self.current_date.month)
+        index = requests.get(source)
+        parser = BeautifulSoup(index.content, 'html.parser')
+        containers = parser.find_all('div', attrs={'class': 'panel'})
+        imgs = []
+        for c in containers:
+            imgs.append(c.find('img'))
+        imgs.reverse()
+        current_img = imgs[self.current_date.day - 1]
+        word = current_img.get('alt')
+        pic = requests.get(current_img.get('src')).content
         return [pic, word]
 
     def update_data(self):
@@ -87,6 +108,13 @@ class Kernel:
         height = int(h * factor)
         return pil_image.resize((width, height), Image.ANTIALIAS)
 
+
 if __name__ == '__main__':
-    import requests
-    print requests.get('https://www.baidu.com')
+    # https://www.bing.com/HPImageArchive.aspx?format=js&index=1&n=1
+    html = requests.get('http://bingwallpaper.anerg.com/201710')
+    s = BeautifulSoup(html.content, 'html.parser')
+    s = s.find_all('div', attrs={'class': 'panel'})
+    for i in s:
+        print(i.find('a').get('href'))
+
+    print(len(s))
