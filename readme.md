@@ -42,7 +42,12 @@ Just a reminder, the memu will be hidden by left click in the image area.
 1. first, download or clone the entire project.
 1. then, run command `python2 bing.py` in your terminal.
 
+for convenience, I made a shortcut for this program.In fact, it's a text file,
+if you want to use it, open it with any editor and fill in values I comment.
+Then, give executable permission to the shortcut and copy it to desktop.
+Now, you can start the program by clicking the shortcut in your desktop.  
 ## Note
 
-the data comes from `https://bingwallpaper.com` and `http://cdn.nanxiongnandi.com/bing`.
+Data comes from `http://bingwallpaper.anerg.com`
+
 
