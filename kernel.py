@@ -56,7 +56,7 @@ class Kernel:
         # return [pic, word]
         source = 'http://bingwallpaper.anerg.com/cn/{}{}'.format(self.current_date.year,
                                                                  self.current_date.month)
-        index = requests.get(source)
+        index = requests.get(source, timeout=5)
         parser = BeautifulSoup(index.content, 'html.parser')
         containers = parser.find_all('div', attrs={'class': 'panel'})
         imgs = []
@@ -65,7 +65,7 @@ class Kernel:
         imgs.reverse()
         current_img = imgs[self.current_date.day - 1]
         word = current_img.get('alt')
-        pic = requests.get(current_img.get('src')).content
+        pic = requests.get(current_img.get('src'), timeout=5).content
         return [pic, word]
 
     def update_data(self):
