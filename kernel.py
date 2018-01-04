@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-import urllib2
+# -*- coding: utf-8
 import datetime
 import io
-from Tkconstants import NONE
+from tkinter.constants import NONE
 from PIL import Image, ImageTk
 from bs4 import BeautifulSoup
 import sys, os
@@ -54,8 +53,10 @@ class Kernel:
         # word = parsed_data['images'][0]['copyright']
         # pic = requests.get('http://cdn.nanxiongnandi.com/bing' + src).content
         # return [pic, word]
+        month = self.current_date.month
+        month = '0{}'.format(month) if month < 10 else str(month)
         source = 'http://bingwallpaper.anerg.com/cn/{}{}'.format(self.current_date.year,
-                                                                 self.current_date.month)
+                                                                 month )
         index = requests.get(source, timeout=5)
         parser = BeautifulSoup(index.content, 'html.parser')
         containers = parser.find_all('div', attrs={'class': 'panel'})

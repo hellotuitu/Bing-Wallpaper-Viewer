@@ -1,9 +1,13 @@
 # -*- coding: UTF-8 -*-
-from Tkinter import *
-import tkFileDialog
-from tkSimpleDialog import askstring
-import tkMessageBox
-import thread
+import os
+from tkinter import *
+#import tkFileDialog
+from tkinter import filedialog as tkFileDialog
+#from tkSimpleDialog import askstring
+from tkinter.simpledialog import askstring
+from tkinter import messagebox as tkMessageBox
+#import tkMessageBox
+import _thread as thread
 import platform
 
 class Bing:
@@ -45,12 +49,18 @@ class Bing:
         try:
             self.kernel.update_data()
             self.image_label['image'] = self.kernel.current_image
-            self.date_v.set(str(self.kernel.current_date))
+
             if platform.system() != 'Windows':
                 self.root.title(self.kernel.current_description)
+                self.date_v.set(str(self.kernel.current_date))
+            else:
+                self.date_v.set(str("{}: {}".format(self.kernel.current_date,
+                                                    self.kernel.current_description)))
+
         except BaseException as why:
             self.kernel.current_date = self.kernel.last_date
-            print why
+            print(why)
+            self.date_v.set(str(why))
             return False
         else:
             return True
@@ -76,11 +86,25 @@ class Bing:
         thread.start_new_thread(self.multithread, ("Thread-1", 0,))
 
     def save_file_handler(self):
-        self.kernel.save_current_image(str(self.kernel.current_date) + '.jpg')
+        path = str(self.kernel.current_date) + '.jpg'
+        if os.path.isfile(path):
+            #raise Exception('图片已经保存过了')
+            self.date_v.set('图像已经保存过了')
+        else:
+            self.kernel.save_current_image(path)
+            self.date_v.set('保存成功')
+
 
     def save_file_to_handler(self):
         filename = tkFileDialog.askdirectory()
-        self.kernel.save_current_image(filename + '/' + str(self.kernel.current_date) + '.jpg')
+        path = filename + '/' + str(self.kernel.current_date) + '.jpg'
+        if os.path.isfile(path):
+            #raise Exception('图片已经保存过了')
+            self.date_v.set('图像已经保存过了')
+        else:
+            self.kernel.save_current_image(path)
+            self.date_v.set('保存成功')
+            
 
     def ask_date_to_handler(self):
         input_date = askstring('Bing Wallpaper Viewer', '输入日期', initialvalue=str(self.kernel.current_date))
