@@ -1,14 +1,16 @@
 # -*- coding: UTF-8 -*-
 import os
-from tkinter import *
-#import tkFileDialog
-from tkinter import filedialog as tkFileDialog
-#from tkSimpleDialog import askstring
-from tkinter.simpledialog import askstring
-from tkinter import messagebox as tkMessageBox
-#import tkMessageBox
 import _thread as thread
-import platform
+from tkinter import *
+from tkinter import filedialog as tkFileDialog
+from tkinter.simpledialog import askstring
+
+
+# import platform
+# from tkSimpleDialog import askstring
+# import tkFileDialog
+# from tkinter import messagebox as tkMessageBox
+# import tkMessageBox
 
 class Bing:
     def __init__(self, kernel):
@@ -50,28 +52,23 @@ class Bing:
             self.kernel.update_data()
             self.image_label['image'] = self.kernel.current_image
 
-            if platform.system() != 'Windows':
-                self.root.title(self.kernel.current_description)
-                self.date_v.set(str(self.kernel.current_date))
-            else:
-                self.date_v.set(str("{}: {}".format(self.kernel.current_date,
-                                                    self.kernel.current_description)))
+            desp = "{}: {}".format(self.kernel.current_date,
+                                   self.kernel.current_description.split('(')[0]).center(40)
+            self.date_v.set(desp)
 
         except BaseException as why:
             self.kernel.current_date = self.kernel.last_date
-            print(why)
-            self.date_v.set(str(why))
-            return False
-        else:
-            return True
+            why = str(why).center(40) if len(str(why)) <= 40 else str(why)[0:37] + '...'
+            self.date_v.set(why)
+            self.description_label['fg'] = 'red'
 
     def multithread(self, threadName, delay):
+        self.description_label['fg'] = 'black'
         self.next_button['state'] = DISABLED
         self.pre_button['state'] = DISABLED
-
         self.date_v.set('loading...')
-        if not self.update():
-            self.date_v.set('fail to load!')
+
+        self.update()
 
         self.next_button['state'] = NORMAL
         self.pre_button['state'] = NORMAL
@@ -88,23 +85,19 @@ class Bing:
     def save_file_handler(self):
         path = str(self.kernel.current_date) + '.jpg'
         if os.path.isfile(path):
-            #raise Exception('图片已经保存过了')
             self.date_v.set('图像已经保存过了')
         else:
             self.kernel.save_current_image(path)
             self.date_v.set('保存成功')
-
 
     def save_file_to_handler(self):
         filename = tkFileDialog.askdirectory()
         path = filename + '/' + str(self.kernel.current_date) + '.jpg'
         if os.path.isfile(path):
-            #raise Exception('图片已经保存过了')
             self.date_v.set('图像已经保存过了')
         else:
             self.kernel.save_current_image(path)
             self.date_v.set('保存成功')
-            
 
     def ask_date_to_handler(self):
         input_date = askstring('Bing Wallpaper Viewer', '输入日期', initialvalue=str(self.kernel.current_date))
@@ -116,5 +109,6 @@ class Bing:
 
     def left_key_handler(self, event):
         self.menubar.unpost()
+
 
 if __name__ == '__main__': pass

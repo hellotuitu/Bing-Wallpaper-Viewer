@@ -5,7 +5,6 @@ from tkinter.constants import NONE
 from PIL import Image, ImageTk
 from bs4 import BeautifulSoup
 import sys, os
-import json
 import requests
 
 
@@ -33,40 +32,31 @@ class Kernel:
         self.current_description = NONE
 
     def init_kernel(self):
-        image = Image.open(resource_path('default.jpg'))
+        # image = Image.open(resource_path('default.jpg'))
         w_box = 1000
         h_box = 1000
+        image = Image.new('RGB', (1366, 768), 'black')
         w, h = image.size
         image_resized = self.resize_image(w, h, w_box, h_box, image)
         self.current_image = ImageTk.PhotoImage(image_resized)
 
     def get_data(self):
-        # date_gap = (datetime.date.today() - self.current_date).days
-        # data = requests.get('https://www.bing.com/HPImageArchive.aspx', {
-        #     'format': 'js',
-        #     'idx': date_gap,
-        #     'n': '1', })
-        # parsed_data = json.loads(data.content, encoding='utf-8')
-        # # print unicode(parsed_data).decode('unicode-escape')
-        # src = parsed_data['images'][0]['urlbase']
-        # src = src[src.rindex('/'):] + '_1366x768.jpg'
-        # word = parsed_data['images'][0]['copyright']
-        # pic = requests.get('http://cdn.nanxiongnandi.com/bing' + src).content
-        # return [pic, word]
-        month = self.current_date.month
-        month = '0{}'.format(month) if month < 10 else str(month)
-        source = 'http://bingwallpaper.anerg.com/cn/{}{}'.format(self.current_date.year,
-                                                                 month )
-        index = requests.get(source, timeout=5)
-        parser = BeautifulSoup(index.content, 'html.parser')
-        containers = parser.find_all('div', attrs={'class': 'panel'})
-        imgs = []
-        for c in containers:
-            imgs.append(c.find('img'))
-        imgs.reverse()
-        current_img = imgs[self.current_date.day - 1]
-        word = current_img.get('alt')
-        pic = requests.get(current_img.get('src'), timeout=5).content
+        try:
+            month = str(self.current_date.month).zfill(2)
+            year = self.current_date.year
+            source = 'http://bingwallpaper.anerg.com/cn/{}{}'.format(year, month)
+            index = requests.get(source, timeout=5)
+            parser = BeautifulSoup(index.content, 'html.parser')
+            containers = parser.find_all('div', attrs={'class': 'panel'})
+            imgs = []
+            for c in containers:
+                imgs.append(c.find('img'))
+            imgs.reverse()
+            current_img = imgs[self.current_date.day - 1]
+            word = current_img.get('alt')
+            pic = requests.get(current_img.get('src'), timeout=5).content
+        except Exception as why:
+            raise Exception('获取数据失败： {}'.format(why))
         return [pic, word]
 
     def update_data(self):
@@ -79,6 +69,7 @@ class Kernel:
         w_box = 1000
         h_box = 1000
         w, h = image.size
+        print(w, h)
         image_resized = self.resize_image(w, h, w_box, h_box, image)
         self.current_image = ImageTk.PhotoImage(image_resized)
 
@@ -119,3 +110,6 @@ if __name__ == '__main__':
         print(i.find('a').get('href'))
 
     print(len(s))
+
+    a = '111'
+    a.center()
