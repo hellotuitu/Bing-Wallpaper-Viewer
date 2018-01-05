@@ -33,6 +33,13 @@ class Bing:
         self.image_label.bind("<ButtonPress-3>", self.right_key_handler)
         self.image_label.bind("<ButtonPress-1>", self.left_key_handler)
 
+        # keyboard event
+        self.root.bind('<Up>', self.event_warp(self.pre_button_handler))
+        self.root.bind('<Left>', self.event_warp(self.pre_button_handler))
+        self.root.bind('<Right>', self.event_warp(self.next_button_handler))
+        self.root.bind('<Down>', self.event_warp(self.next_button_handler))
+        self.root.bind('<Control-s>', self.event_warp(self.save_file_handler))
+
         self.image_label.grid(row=0, column=0, columnspan=3)
         self.pre_button.grid(row=1, column=0)
         self.description_label.grid(row=1, column=1)
@@ -74,13 +81,14 @@ class Bing:
         self.pre_button['state'] = NORMAL
 
     def pre_button_handler(self):
-        self.kernel.pre_date()
-        thread.start_new_thread(self.multithread, ("Thread-1", 0,))
-        # self.update()
+        if self.pre_button['state'] == NORMAL:
+            self.kernel.pre_date()
+            thread.start_new_thread(self.multithread, ("Thread-1", 0,))
 
     def next_button_handler(self):
-        self.kernel.next_date()
-        thread.start_new_thread(self.multithread, ("Thread-1", 0,))
+        if self.next_button['state'] == NORMAL:
+            self.kernel.next_date()
+            thread.start_new_thread(self.multithread, ("Thread-1", 0,))
 
     def save_file_handler(self):
         path = str(self.kernel.current_date) + '.jpg'
@@ -109,6 +117,14 @@ class Bing:
 
     def left_key_handler(self, event):
         self.menubar.unpost()
+
+    @staticmethod
+    def event_warp(func):
+        def handle(event):
+            func()
+
+        return handle
+
 
 
 if __name__ == '__main__': pass

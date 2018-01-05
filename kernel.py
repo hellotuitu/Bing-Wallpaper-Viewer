@@ -69,7 +69,6 @@ class Kernel:
         w_box = 1000
         h_box = 1000
         w, h = image.size
-        print(w, h)
         image_resized = self.resize_image(w, h, w_box, h_box, image)
         self.current_image = ImageTk.PhotoImage(image_resized)
 
