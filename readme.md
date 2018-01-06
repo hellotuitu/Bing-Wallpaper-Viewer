@@ -6,11 +6,11 @@ has watermelon.For this reason, I wrote this program
 to view and download everyday's wallpaper from bing.
 
 I think it will be useful if you like bing's wallpapers
-too.
+too.Have fun with it!
 
 ## Requirements
 
-Based on python2.7.Packages imported by this program
+Based on ~~python2.7~~ Python 3.x. Packages imported by this program
 could be found in `requirements.txt`.
 
 ## Usage
@@ -28,7 +28,7 @@ wallpaper the day after.
 
 if you right click in the image area, a menu will be poped out.
 The menu has three buttons.
-- `保存到当前文件夹`: this button allows you to save current image to 
+- `保存到当前文件夹`: this button allows you to save current image to
 current folder.
 - `保存到指定的文件夹`: this button allows you to save current image to
 folder you specified.
@@ -40,7 +40,7 @@ Just a reminder, the memu will be hidden by left click in the image area.
 ### How to run it
 
 1. first, download or clone the entire project.
-1. then, run command `python2 bing.py` in your terminal.
+1. then, run command `python3 bing.py` in your terminal.
 
 for convenience, I made a shortcut for this program.In fact, it's a text file,
 if you want to use it, open it with any editor and fill in values I comment.
@@ -50,4 +50,11 @@ Now, you can start the program by clicking the shortcut in your desktop.
 
 Data comes from `http://bingwallpaper.anerg.com`
 
+### TODO
 
+- [x] change to python 3.x
+- [x] handle exceptions and display them
+- [x] add keyboard control
+- [ ] add full screen mode
+- [ ] make window size changable
+- [ ] design a new way to display messages in full screen mode
