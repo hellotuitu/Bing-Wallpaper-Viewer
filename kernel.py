@@ -20,6 +20,7 @@ def resource_path(relative_path):
 
 
 class Kernel:
+    """kernel of the viewer"""
     def __init__(self):
         # change resorce to http://bingwallpaper.anerg.com/cn/
         # it's a sad story because bing only provides no more than 7 days' wallpapers

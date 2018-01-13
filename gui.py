@@ -13,6 +13,7 @@ from tkinter.simpledialog import askstring
 # import tkMessageBox
 
 class Bing:
+    """user interface"""
     def __init__(self, kernel):
         self.root = root = Tk()
         self.kernel = kernel
@@ -30,15 +31,16 @@ class Bing:
         self.menubar.add_separator()
         self.menubar.add_command(label='跳转到指定日期的图片', command=self.ask_date_to_handler)
 
+        # mouse event
         self.image_label.bind("<ButtonPress-3>", self.right_key_handler)
         self.image_label.bind("<ButtonPress-1>", self.left_key_handler)
 
         # keyboard event
-        self.root.bind('<Up>', self.event_warp(self.pre_button_handler))
-        self.root.bind('<Left>', self.event_warp(self.pre_button_handler))
-        self.root.bind('<Right>', self.event_warp(self.next_button_handler))
-        self.root.bind('<Down>', self.event_warp(self.next_button_handler))
-        self.root.bind('<Control-s>', self.event_warp(self.save_file_handler))
+        self.root.bind('<Up>', self.event_wrap(self.pre_button_handler))
+        self.root.bind('<Left>', self.event_wrap(self.pre_button_handler))
+        self.root.bind('<Right>', self.event_wrap(self.next_button_handler))
+        self.root.bind('<Down>', self.event_wrap(self.next_button_handler))
+        self.root.bind('<Control-s>', self.event_wrap(self.save_file_handler))
 
         self.image_label.grid(row=0, column=0, columnspan=3)
         self.pre_button.grid(row=1, column=0)
@@ -46,6 +48,7 @@ class Bing:
         self.next_button.grid(row=1, column=2)
 
         self.init_set()
+        self.root.resizable(True, True)
         self.root.mainloop()
 
     def init_set(self):
@@ -69,10 +72,10 @@ class Bing:
             self.date_v.set(why)
             self.description_label['fg'] = 'red'
 
-    def multithread(self, threadName, delay):
+    def multithread(self, thread_name, delay):
         self.description_label['fg'] = 'black'
-        self.next_button['state'] = DISABLED
         self.pre_button['state'] = DISABLED
+        self.next_button['state'] = DISABLED
         self.date_v.set('loading...')
 
         self.update()
@@ -119,12 +122,11 @@ class Bing:
         self.menubar.unpost()
 
     @staticmethod
-    def event_warp(func):
+    def event_wrap(func):
         def handle(event):
             func()
 
         return handle
-
 
 
 if __name__ == '__main__': pass
