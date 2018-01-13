@@ -32,14 +32,14 @@ class Kernel:
         self.current_raw_image = NONE
         self.current_description = NONE
 
-    def init_kernel(self):
+    def init_kernel(self): pass
         # image = Image.open(resource_path('default.jpg'))
-        w_box = 1000
-        h_box = 1000
-        image = Image.new('RGB', (1366, 768), 'black')
-        w, h = image.size
-        image_resized = self.resize_image(w, h, w_box, h_box, image)
-        self.current_image = ImageTk.PhotoImage(image_resized)
+        # w_box = 1000
+        # h_box = 1000
+        # image = Image.new('RGB', (1366, 768), 'black')
+        # w, h = image.size
+        # image_resized = self.resize_image(w, h, w_box, h_box, image)
+        # self.current_image = ImageTk.PhotoImage(image_resized)
 
     def get_data(self):
         try:
@@ -67,11 +67,12 @@ class Kernel:
     def process_image(self):
         data_stream = io.BytesIO(self.current_raw_image)
         image = Image.open(data_stream)
-        w_box = 1000
-        h_box = 1000
-        w, h = image.size
-        image_resized = self.resize_image(w, h, w_box, h_box, image)
-        self.current_image = ImageTk.PhotoImage(image_resized)
+        # w_box = 1000
+        # h_box = 1000
+        # w, h = image.size
+        # image_resized = self.resize_image(w, h, w_box, h_box, image)
+        # self.current_image = ImageTk.PhotoImage(image_resized)
+        self.current_image = image
 
     def save_current_image(self, full_path):
         img_file = open(full_path, 'wb')
