@@ -56,5 +56,5 @@ Data comes from `http://bingwallpaper.anerg.com`
 - [x] handle exceptions and display them
 - [x] add keyboard control
 - [ ] add full screen mode
-- [ ] make window size changable
+- [x] make window size changable
 - [ ] design a new way to display messages in full screen mode
