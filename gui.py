@@ -1,25 +1,23 @@
 # -*- coding: UTF-8 -*-
 import os
+import random
+import datetime
 import _thread as thread
 from tkinter import *
 from tkinter import filedialog as tkFileDialog
 from tkinter.simpledialog import askstring
-import random
+from PIL import ImageTk
 
-# import platform
-# from tkSimpleDialog import askstring
-# import tkFileDialog
-# from tkinter import messagebox as tkMessageBox
-# import tkMessageBox
-from PIL import Image, ImageTk
 
 class Bing:
     """user interface"""
     def __init__(self, kernel):
+        # declare some attrubutes
+        self.size = (0, 0)
+        self.image = None
+
         self.root = root = Tk()
         self.kernel = kernel
-
-        self.size = (0, 0)
 
         self.image_label = Label(root)
         self.date_v = StringVar(root)
@@ -66,46 +64,39 @@ class Bing:
 
     def init_set(self):
         self.root.title('Bing Wallpaper Viewer')
-        # self.kernel.init_kernel()
-        w_box = 1000
-        h_box = 1000
-        image = Image.new('RGB', (1366, 768), 'black')
-        w, h = image.size
-        image_resized = self.kernel.resize_image(w, h, w_box, h_box, image)
+        w_box = h_box = 1000
+        w, h = self.kernel.current_image.size
+        image_resized = self.kernel.resize_image(w, h, w_box, h_box, self.kernel.current_image)
         self.image = ImageTk.PhotoImage(image_resized)
         self.image_label['image'] = self.image
-        thread.start_new_thread(self.multithread, ("Thread-1", 0,))
+        thread.start_new_thread(self.back_thread, (self.kernel.current_date,))
 
-    def update(self):
+    def update(self, date):
         try:
-            self.kernel.update_data()
+            self.kernel.update_data_with_date(date)
             h_box = w_box = self.image_label.winfo_width()
-            # print(w_box, h_box)
             w, h = self.kernel.current_image.size
             image_resized = self.kernel.resize_image(w, h, w_box, h_box, self.kernel.current_image)
-            w, h = image_resized.size
 
             self.image = ImageTk.PhotoImage(image_resized)
             self.image_label['image'] = self.image
-            self.image_label.config(width=w, height=h)
             desp = "{}: {}".format(self.kernel.current_date,
                                    self.kernel.current_description.split('(')[0]).center(40)
             self.date_v.set(desp)
 
         except BaseException as why:
-            self.kernel.current_date = self.kernel.last_date
             print(why)
             why = str(why).center(40) if len(str(why)) <= 40 else str(why)[0:37] + '...'
             self.date_v.set(why)
             self.description_label['fg'] = 'red'
 
-    def multithread(self, thread_name, delay):
+    def back_thread(self, date=None):
         self.description_label['fg'] = 'black'
         self.pre_button['state'] = DISABLED
         self.next_button['state'] = DISABLED
         self.date_v.set('loading...')
 
-        self.update()
+        self.update(date)
 
         self.next_button['state'] = NORMAL
         self.pre_button['state'] = NORMAL
@@ -113,34 +104,38 @@ class Bing:
     def pre_button_handler(self):
         if self.pre_button['state'] == NORMAL:
             self.kernel.pre_date()
-            thread.start_new_thread(self.multithread, ("Thread-1", 0,))
+            thread.start_new_thread(self.back_thread, (self.kernel.pre_date(),))
 
     def next_button_handler(self):
         if self.next_button['state'] == NORMAL:
             self.kernel.next_date()
-            thread.start_new_thread(self.multithread, ("Thread-1", 0,))
+            thread.start_new_thread(self.back_thread, (self.kernel.next_date(),))
 
-    def save_file_handler(self):
-        path = str(self.kernel.current_date) + '.jpg'
+    def ask_date_to_handler(self):
+        input_date = askstring('Bing Wallpaper Viewer', '输入日期', initialvalue=str(self.kernel.current_date))
+        date = datetime.datetime.strptime(input_date, "%Y-%m-%d").date()
+        thread.start_new_thread(self.back_thread, (date,))
+
+    def save_file(self, path):
         if os.path.isfile(path):
             self.date_v.set('图像已经保存过了')
         else:
-            self.kernel.save_current_image(path)
-            self.date_v.set('保存成功')
+            try:
+                if self.kernel.save_current_image(path):
+                    self.date_v.set('保存成功')
+                else:
+                    self.date_v.set('保存失败')
+            except:
+                self.date_v.set('保存失败')
+
+    def save_file_handler(self):
+        path = str(self.kernel.current_date) + '.jpg'
+        self.save_file(path)
 
     def save_file_to_handler(self):
         filename = tkFileDialog.askdirectory()
         path = filename + '/' + str(self.kernel.current_date) + '.jpg'
-        if os.path.isfile(path):
-            self.date_v.set('图像已经保存过了')
-        else:
-            self.kernel.save_current_image(path)
-            self.date_v.set('保存成功')
-
-    def ask_date_to_handler(self):
-        input_date = askstring('Bing Wallpaper Viewer', '输入日期', initialvalue=str(self.kernel.current_date))
-        self.kernel.goto_date(input_date)
-        thread.start_new_thread(self.multithread, ("Thread-1", 0,))
+        self.save_file(path)
 
     def right_key_handler(self, event):
         self.menubar.post(event.x_root, event.y_root)
@@ -154,22 +149,8 @@ class Bing:
         self.size = (event.width, event.height)
         if random.choice(range(10)) > 1:
             return None
-
-        # print('X: {}, y: {}'.format(event.width, event.height))
-        # print('OX: {}, Oy: {}'.format(self.kernel.current_image.width, self.kernel.current_image.height))
-        # print(self.image_label['image'])
-        # determine the ratio of old width/height to new width/height
-        # wscale = float(event.width) / self.width
-        # hscale = float(event.height) / self.height
-        # self.width = event.width
-        # self.height = event.height
-        # resize the canvas
-        # self.config(width=self.width, height=self.height)
-        # rescale all the objects tagged with the "all" tag
-        # self.scale("all", 0, 0, wscale, hscale)
-
-        h_box = w_box = self.image_label.winfo_width() - 4
-        # print(w_box, h_box)
+        margin = 4
+        h_box = w_box = self.image_label.winfo_width() - margin
         w, h = self.kernel.current_image.size
         image_resized = self.kernel.resize_image(w, h, w_box, h_box, self.kernel.current_image)
         w, h = image_resized.size
@@ -177,11 +158,6 @@ class Bing:
         self.image = ImageTk.PhotoImage(image_resized)
         self.image_label['image'] = self.image
         self.image_label.config(width=w, height=h)
-
-        # width = self.root.winfo_width()
-        # height = self.root.winfo_height()
-        # self.root.config(width=width, height=height)
-
 
     @staticmethod
     def event_wrap(func):
