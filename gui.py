@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 import os
 import random
@@ -15,6 +16,7 @@ class Bing:
         # declare some attrubutes
         self.size = (0, 0)
         self.image = None
+        self.init_width = 1000
 
         self.root = root = Tk()
         self.kernel = kernel
@@ -60,21 +62,27 @@ class Bing:
         # make it can not be resizable
         # self.root.resizable(False, False)
         self.root.resizable(True, True)
+        # root.geometry('1000x590+500+200')
         self.root.mainloop()
 
     def init_set(self):
         self.root.title('Bing Wallpaper Viewer')
-        w_box = h_box = 1000
+        w_box = h_box = self.init_width
         w, h = self.kernel.current_image.size
         image_resized = self.kernel.resize_image(w, h, w_box, h_box, self.kernel.current_image)
         self.image = ImageTk.PhotoImage(image_resized)
         self.image_label['image'] = self.image
+        # self.back_thread(self.kernel.current_date)
         thread.start_new_thread(self.back_thread, (self.kernel.current_date,))
 
     def update(self, date):
         try:
             self.kernel.update_data_with_date(date)
-            h_box = w_box = self.image_label.winfo_width()
+            label_width = self.image_label.winfo_width()
+            if hasattr(self, 'margin'):
+                h_box = w_box = label_width - self.margin
+            else:
+                h_box = w_box = self.init_width
             w, h = self.kernel.current_image.size
             image_resized = self.kernel.resize_image(w, h, w_box, h_box, self.kernel.current_image)
 
@@ -102,19 +110,18 @@ class Bing:
         self.pre_button['state'] = NORMAL
 
     def pre_button_handler(self):
-        if self.pre_button['state'] == NORMAL:
-            self.kernel.pre_date()
+        if self.pre_button['state'] != DISABLED:
             thread.start_new_thread(self.back_thread, (self.kernel.pre_date(),))
 
     def next_button_handler(self):
-        if self.next_button['state'] == NORMAL:
-            self.kernel.next_date()
+        if self.next_button['state'] == DISABLED:
             thread.start_new_thread(self.back_thread, (self.kernel.next_date(),))
 
     def ask_date_to_handler(self):
-        input_date = askstring('Bing Wallpaper Viewer', '输入日期', initialvalue=str(self.kernel.current_date))
-        date = datetime.datetime.strptime(input_date, "%Y-%m-%d").date()
-        thread.start_new_thread(self.back_thread, (date,))
+        if self.pre_button['state'] != DISABLED:
+            input_date = askstring('Bing Wallpaper Viewer', '输入日期', initialvalue=str(self.kernel.current_date))
+            date = datetime.datetime.strptime(input_date, "%Y-%m-%d").date()
+            thread.start_new_thread(self.back_thread, (date,))
 
     def save_file(self, path):
         if os.path.isfile(path):
@@ -144,13 +151,26 @@ class Bing:
         self.menubar.unpost()
 
     def on_resize(self, event):
+        # if window just move, ignore the event
         if self.size == (event.width, event.height):
             return None
         self.size = (event.width, event.height)
+
+        # make resize fluently
         if random.choice(range(10)) > 1:
             return None
-        margin = 4
-        h_box = w_box = self.image_label.winfo_width() - margin
+
+        label_width = self.image_label.winfo_width()
+        # label still not initialized
+        if label_width < 10:
+            return None
+
+        # set margin
+        if not hasattr(self, 'margin'):
+            self.margin = label_width - self.init_width
+
+        # resize image
+        h_box = w_box = label_width - self.margin
         w, h = self.kernel.current_image.size
         image_resized = self.kernel.resize_image(w, h, w_box, h_box, self.kernel.current_image)
         w, h = image_resized.size
