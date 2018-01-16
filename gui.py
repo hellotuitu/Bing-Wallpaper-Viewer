@@ -4,6 +4,7 @@ import os
 import random
 import datetime
 import _thread as thread
+import threading
 from tkinter import *
 from tkinter import filedialog as tkFileDialog
 from tkinter.simpledialog import askstring
@@ -17,7 +18,7 @@ class Bing:
         self.size = (0, 0)
         self.image = None
         self.init_width = 1000
-
+        self.resize_counter = 0
         self.root = root = Tk()
         self.kernel = kernel
 
@@ -46,7 +47,7 @@ class Bing:
         self.root.bind('<Control-s>', self.event_wrap(self.save_file_handler))
 
         # window resize event
-        self.root.bind('<Configure>', self.on_resize)
+        self.root.bind('<Configure>', self.on_resize_handler)
 
         for col in range(3):
             Grid.columnconfigure(self.root, col, weight=1)
@@ -72,8 +73,7 @@ class Bing:
         image_resized = self.kernel.resize_image(w, h, w_box, h_box, self.kernel.current_image)
         self.image = ImageTk.PhotoImage(image_resized)
         self.image_label['image'] = self.image
-        # self.back_thread(self.kernel.current_date)
-        thread.start_new_thread(self.back_thread, (self.kernel.current_date,))
+        threading.Thread(target=self.back_thread, args=(self.kernel.current_date,)).start()
 
     def update(self, date):
         try:
@@ -85,7 +85,7 @@ class Bing:
                 h_box = w_box = self.init_width
             w, h = self.kernel.current_image.size
             image_resized = self.kernel.resize_image(w, h, w_box, h_box, self.kernel.current_image)
-
+            # self.image.paste(image_resized)
             self.image = ImageTk.PhotoImage(image_resized)
             self.image_label['image'] = self.image
             desp = "{}: {}".format(self.kernel.current_date,
@@ -111,17 +111,17 @@ class Bing:
 
     def pre_button_handler(self):
         if self.pre_button['state'] != DISABLED:
-            thread.start_new_thread(self.back_thread, (self.kernel.pre_date(),))
+            threading.Thread(target=self.back_thread, args=(self.kernel.pre_date(),)).start()
 
     def next_button_handler(self):
         if self.next_button['state'] == DISABLED:
-            thread.start_new_thread(self.back_thread, (self.kernel.next_date(),))
+            threading.Thread(target=self.back_thread, args=(self.kernel.next_date(),)).start()
 
     def ask_date_to_handler(self):
         if self.pre_button['state'] != DISABLED:
             input_date = askstring('Bing Wallpaper Viewer', '输入日期', initialvalue=str(self.kernel.current_date))
             date = datetime.datetime.strptime(input_date, "%Y-%m-%d").date()
-            thread.start_new_thread(self.back_thread, (date,))
+            threading.Thread(target=self.back_thread, args=(date,)).start()
 
     def save_file(self, path):
         if os.path.isfile(path):
@@ -150,15 +150,15 @@ class Bing:
     def left_key_handler(self, event):
         self.menubar.unpost()
 
-    def on_resize(self, event):
+    def on_resize_handler(self, event):
+        self.resize_counter += 1
+        threading.Thread(target=self.on_resize, args=(event, self.resize_counter,)).start()
+
+    def on_resize(self, event, counter):
         # if window just move, ignore the event
         if self.size == (event.width, event.height):
             return None
         self.size = (event.width, event.height)
-
-        # make resize fluently
-        if random.choice(range(10)) > 1:
-            return None
 
         label_width = self.image_label.winfo_width()
         # label still not initialized
@@ -172,9 +172,14 @@ class Bing:
         # resize image
         h_box = w_box = label_width - self.margin
         w, h = self.kernel.current_image.size
+        
+        if counter != self.resize_counter:
+            # if more events happen
+            # just do nothing
+            return None
+        
         image_resized = self.kernel.resize_image(w, h, w_box, h_box, self.kernel.current_image)
         w, h = image_resized.size
-
         self.image = ImageTk.PhotoImage(image_resized)
         self.image_label['image'] = self.image
         self.image_label.config(width=w, height=h)
