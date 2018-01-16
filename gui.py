@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 import os
-import random
 import datetime
-import _thread as thread
 import threading
 from tkinter import *
 from tkinter import filedialog as tkFileDialog
@@ -114,7 +112,7 @@ class Bing:
             threading.Thread(target=self.back_thread, args=(self.kernel.pre_date(),)).start()
 
     def next_button_handler(self):
-        if self.next_button['state'] == DISABLED:
+        if self.next_button['state'] != DISABLED:
             threading.Thread(target=self.back_thread, args=(self.kernel.next_date(),)).start()
 
     def ask_date_to_handler(self):
@@ -156,9 +154,9 @@ class Bing:
 
     def on_resize(self, event, counter):
         # if window just move, ignore the event
-        if self.size == (event.width, event.height):
+        if self.size == (self.image_label.winfo_width(), self.image_label.winfo_height()):
             return None
-        self.size = (event.width, event.height)
+        self.size = (self.image_label.winfo_width(), self.image_label.winfo_height())
 
         label_width = self.image_label.winfo_width()
         # label still not initialized
@@ -179,10 +177,11 @@ class Bing:
             return None
         
         image_resized = self.kernel.resize_image(w, h, w_box, h_box, self.kernel.current_image)
-        w, h = image_resized.size
+        if (self.image.width(), self.image.height()) == image_resized.size:
+            # if size does not change
+            return None
         self.image = ImageTk.PhotoImage(image_resized)
         self.image_label['image'] = self.image
-        self.image_label.config(width=w, height=h)
 
     @staticmethod
     def event_wrap(func):
