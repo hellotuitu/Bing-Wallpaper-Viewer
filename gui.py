@@ -6,6 +6,7 @@ import threading
 from tkinter import *
 from tkinter import filedialog as tkFileDialog
 from tkinter.simpledialog import askstring
+# in python3 and linux platform, need to install python3-pil.imagetk
 from PIL import ImageTk
 
 
