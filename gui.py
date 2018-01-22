@@ -48,6 +48,7 @@ class Bing:
         self.root.bind('<Control-s>', self.event_wrap(self.save_file_handler))
         # full screen toggle
         self.root.bind('<Escape>', self.event_wrap(self.toggle_fullscreen))
+        self.root.bind('<Alt-Return>', self.event_wrap(self.toggle_fullscreen))
 
         # window resize event
         self.root.bind('<Configure>', self.on_resize_handler)
