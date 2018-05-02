@@ -13,31 +13,7 @@ too.Have fun with it!
 Based on ~~python2.7~~ Python 3.x. Packages imported by this program
 could be found in `requirements.txt`.
 
-## Usage
-
- ![bing_gui](./bing_gui.png)
-
-like the picture above showed, in the bottom,there
-are three blocks(two buttons and one label).
-
-- `< pre`: by pressing this button, the image area will show
-wallpaper the day before.
-- `label`: the label shows the current day.
-- `next >`: by pressing this button, the image area will show
-wallpaper the day after.
-
-if you right click in the image area, a menu will be poped out.
-The menu has three buttons.
-- `保存到当前文件夹`: this button allows you to save current image to
-current folder.
-- `保存到指定的文件夹`: this button allows you to save current image to
-folder you specified.
-- `跳转到指定日期的图片`: this button allows you to view wallpaper of the
-day you specified.
-
-Just a reminder, the memu will be hidden by left click in the image area.
-
-### How to run it
+## How to run
 
 1. first, download or clone the entire project.
 1. then, run command `python3 bing.py` in your terminal.
@@ -45,16 +21,34 @@ Just a reminder, the memu will be hidden by left click in the image area.
 for convenience, I made a shortcut for this program.In fact, it's a text file,
 if you want to use it, open it with any editor and fill in values I comment.
 Then, give executable permission to the shortcut and copy it to desktop.
-Now, you can start the program by clicking the shortcut in your desktop.  
+Now, you can start the program by clicking the shortcut in your desktop. 
+
+## Features
+
+(尬尬的英文实在是写不下去了...)
+
+- 支持壁纸保存
+- 支持查看任意一天的壁纸
+- 支持方向键操作
+- 支持全屏模式
+- 支持壁纸随窗口大小自适应缩放
+
+## 键盘控制
+
+- `ctrl-s`: 保存当前图片到程序目录
+- `up`or`left`: 跳转到前一天的壁纸
+- `down`or`right`: 跳转到后一天的壁纸
+- `esc`: 进入或退出全屏模式
+
 ## Note
 
 Data comes from `http://bingwallpaper.anerg.com`
 
-### TODO
+## TODO
 
 - [x] change to python 3.x
 - [x] handle exceptions and display them
 - [x] add keyboard control
-- [ ] add full screen mode
+- [x] add full screen mode
 - [x] make window size changable
 - [ ] design a new way to display messages in full screen mode
