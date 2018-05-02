@@ -6,17 +6,20 @@ import threading
 from tkinter import *
 from tkinter import filedialog as tkFileDialog
 from tkinter.simpledialog import askstring
+# in python3 and linux platform, need to install python3-pil.imagetk
 from PIL import ImageTk
 
 
 class Bing:
     """user interface"""
+
     def __init__(self, kernel):
         # declare some attrubutes
         self.size = (0, 0)
         self.image = None
         self.init_width = 1000
         self.resize_counter = 0
+        self.toggle = True
         self.root = root = Tk()
         self.kernel = kernel
 
@@ -43,6 +46,9 @@ class Bing:
         self.root.bind('<Right>', self.event_wrap(self.next_button_handler))
         self.root.bind('<Down>', self.event_wrap(self.next_button_handler))
         self.root.bind('<Control-s>', self.event_wrap(self.save_file_handler))
+        # full screen toggle
+        self.root.bind('<Escape>', self.event_wrap(self.toggle_fullscreen))
+        self.root.bind('<Alt-Return>', self.event_wrap(self.toggle_fullscreen))
 
         # window resize event
         self.root.bind('<Configure>', self.on_resize_handler)
@@ -52,10 +58,10 @@ class Bing:
         for row in range(2):
             Grid.rowconfigure(self.root, row, weight=1)
 
-        self.image_label.grid(row=0, column=0, columnspan=3, sticky=N+S+E+W)
-        self.pre_button.grid(row=1, column=0, sticky=N+S+E+W)
-        self.description_label.grid(row=1, column=1, sticky=N+S+E+W)
-        self.next_button.grid(row=1, column=2, sticky=N+S+E+W)
+        self.image_label.grid(row=0, column=0, columnspan=3, sticky=N + S + E + W)
+        self.pre_button.grid(row=1, column=0, sticky=N + S + E + W)
+        self.description_label.grid(row=1, column=1, sticky=N + S + E + W)
+        self.next_button.grid(row=1, column=2, sticky=N + S + E + W)
 
         self.init_set()
         # make it can not be resizable
@@ -170,18 +176,34 @@ class Bing:
         # resize image
         h_box = w_box = label_width - self.margin
         w, h = self.kernel.current_image.size
-        
+
         if counter != self.resize_counter:
             # if more events happen
             # just do nothing
             return None
-        
+
         image_resized = self.kernel.resize_image(w, h, w_box, h_box, self.kernel.current_image)
         if (self.image.width(), self.image.height()) == image_resized.size:
             # if size does not change
             return None
         self.image = ImageTk.PhotoImage(image_resized)
         self.image_label['image'] = self.image
+
+    def toggle_fullscreen(self):
+        self.root.attributes("-fullscreen", self.toggle)
+        if self.toggle:
+            self.pre_button.grid_remove()
+            self.next_button.grid_remove()
+            self.description_label.grid_remove()
+            self.__margin = self.margin
+            self.margin = 0
+        else:
+            self.pre_button.grid(row=1, column=0, sticky=N + S + E + W)
+            self.description_label.grid(row=1, column=1, sticky=N + S + E + W)
+            self.next_button.grid(row=1, column=2, sticky=N + S + E + W)
+            self.root.geometry("1000x600+0+0")
+            self.margin = self.__margin
+        self.toggle = bool(not self.toggle)
 
     @staticmethod
     def event_wrap(func):
